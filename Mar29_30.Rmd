@@ -1,0 +1,60 @@
+---
+title: "March 29/30 Lab"
+author: "Neil Montgomery"
+date: "March 29, 2016"
+output: pdf_document
+---
+
+There is not much truly new to do for Lab work this week.
+
+The second assignment will come out soon. It will involve fitting a variety of multiple regression models. 
+
+For this week let's make sure everyone is up to speed with fitting such models, using the data from exercise 12.45 and 12.65 from the book.
+
+## Dummy variables - 12.45
+
+R can automatically generate the required dummy variables. Let's see how it works by trying it both ways.
+
+```{r, message=FALSE}
+library(rio)
+library(dplyr)
+mpg <- import("Ex12.45.txt")
+str(mpg)
+```
+
+The `Type` variable is a "character" variable according to R. We would call that a categortical or factor variable. Let's fit the model `MPG ~ Type`
+
+```{r}
+summary(lm(MPG ~ Type, data=mpg))
+```
+
+What has happened is that R has automagically converted `Type` to a `factor` variable, which we could do explicitly ourselves like this:
+
+```{r}
+factor(mpg$Type)
+```
+
+The "levels" of the factor are: `r levels(factor(mpg$Type))`. R just takes all the unique values and makes the levels whatever they are in alphabetical order. You could define your own order of levels if you like, which we've done before mainly to make the order of boxplots be the way we wanted.  
+
+Look back at the regression output. What has happened is that R creates two dummy variables called `Typesuv` and `Typevan`. What happened to "sedan"? That's the (0,0) setting of the dummy variables, as requested in part (a) of the textbook question. "suv" is the (1,0) setting and "van" is the (0,1) setting. 
+
+We could make are own dummy variables and see if we get the same results. Let's call them t1 and t2. 
+
+```{r}
+mpg %>% 
+  mutate(t1 = Type=="suv", t2 = Type=="van") -> mpg2
+```
+
+If you look at `mpg2` you'll see two new columns with `TRUE` and `FALSE` in them, which are treated as 0 and 1 by R when suitable. So these are dummy variables. Let's fit the model with these two variables:
+
+```{r}
+summary(lm(MPG ~ t1 + t2, mpg2))
+```
+
+Everything is identical. Try making two new dummy variables, this time encoding "van" as the (0,0) case. Run the regression model with these two new dummy variables. What changed? What stayed the same? 
+
+Finally, run the full model with `Type`, `Odometer` and `Octane` as inputs. Give a practical interpretation to the `Typevan` and `Typesuv` lines of the output, which answers 12.45(b).
+
+## 12.65
+
+Use the data to fit a variety of models including higher order terms (polynomial and interaction terms). Note that including an interaction term in the model automatically includes the individual terms as well. Note that there are two possible output variables. Just use `Y1` for now.
